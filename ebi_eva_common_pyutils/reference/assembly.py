@@ -14,6 +14,7 @@
 import os
 import urllib
 from csv import DictReader, excel_tab
+from ftplib import FTP
 import re
 import requests
 from urllib import request
@@ -89,6 +90,47 @@ class NCBIAssembly(AppLogger):
         """
         Internal property that retrieve and store the NCBI ftp url and content of the genome folder.
         """
+        ftp = FTP('ftp.ncbi.nlm.nih.gov', timeout=600)
+        ftp.login('anonymous', 'anonymous')
+        genome_folder = 'genomes/all/' + '/'.join([self.assembly_accession[0:3], self.assembly_accession[4:7],
+                                                   self.assembly_accession[7:10],
+                                                   self.assembly_accession[10:13]]) + '/'
+        ftp.cwd(genome_folder)
+        all_genome_subfolders = []
+        ftp.retrlines('NLST', lambda line: all_genome_subfolders.append(line))
+
+        genome_subfolders = [folder for folder in all_genome_subfolders if folder == self.assembly_accession]
+        if len(genome_subfolders) != 1:
+            self.debug('Cannot find good match for accession folder with "%s": %s match found', self.assembly_accession,
+                       len(genome_subfolders))
+            genome_subfolders = [folder for folder in all_genome_subfolders if
+                                 folder.startswith(self.assembly_accession + '_')]
+        if len(genome_subfolders) != 1:
+            self.debug('Cannot find good match for accession folder with "starting with %s_": %s match found',
+                       self.assembly_accession, len(genome_subfolders))
+            genome_subfolders = [folder for folder in all_genome_subfolders if
+                                 folder.startswith(self.assembly_accession)]
+        if len(genome_subfolders) != 1:
+            self.debug('Cannot find good match for accession folder with "starting with %s": %s match found',
+                       self.assembly_accession, len(genome_subfolders))
+            genome_subfolders = [folder for folder in all_genome_subfolders if self.assembly_accession in folder]
+        if len(genome_subfolders) != 1:
+            self.debug('Cannot find good match for accession folder with "%s in name": %s match found',
+                       self.assembly_accession, len(genome_subfolders))
+            raise Exception('more than one folder matches the assembly accession: ' + str(genome_subfolders))
+        ftp.cwd(genome_subfolders[0])
+        genome_files = []
+        ftp.retrlines('NLST', lambda line: genome_files.append(line))
+        url = 'ftp://' + 'ftp.ncbi.nlm.nih.gov' + '/' + genome_folder + genome_subfolders[0]
+        ftp.close()
+        return url, genome_files
+
+    @cached_property
+    def assembly_report_url(self):
+        """
+        Search on the NCBI FTP for the assembly report file and return the full url if only one found.
+        Raise if not.
+        """
         EUTILS_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
         ESEARCH_URL = EUTILS_URL + 'esearch.fcgi'
         ESUMMARY_URL = EUTILS_URL + 'esummary.fcgi'
@@ -102,21 +144,10 @@ class NCBIAssembly(AppLogger):
             summary_result = requests.get(ESUMMARY_URL, params=payload).json()
             if "result" in summary_result:
                 url = summary_result["result"][str(assembly_id)]["ftppath_assembly_rpt"]
-                return url, [os.path.basename(url)]
+                return url
 
         raise Exception("Could not find assembly report for: " + self.assembly_accession)
 
-    @cached_property
-    def assembly_report_url(self):
-        """
-        Search on the NCBI FTP for the assembly report file and return the full url if only one found.
-        Raise if not.
-        """
-        url, genome_files = self._ncbi_genome_folder_url_and_content
-        assembly_reports = [genome_file for genome_file in genome_files if 'assembly_report.txt' in genome_file]
-        if len(assembly_reports) != 1:
-            raise Exception('more than one file has "assembly_report" in its name: ' + str(assembly_reports))
-        return url + '/' + assembly_reports[0]
 
     @cached_property
     def assembly_fasta_url(self):
