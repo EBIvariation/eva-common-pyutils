@@ -135,7 +135,8 @@ class NCBIAssembly(AppLogger):
         ESEARCH_URL = EUTILS_URL + 'esearch.fcgi'
         ESUMMARY_URL = EUTILS_URL + 'esummary.fcgi'
 
-        payload = {'db': 'Assembly', 'term': '"{}"'.format(self.assembly_accession), 'retmode': 'JSON'}
+        payload = {'db': 'Assembly', 'term': '"{}"'.format(self.assembly_accession), 'retmode': 'JSON',
+                   'tool': 'eva', 'email': 'eva-dev@ebi.ac.uk'}
         assembly_results = requests.get(ESEARCH_URL, params=payload).json()
 
         if assembly_results and assembly_results.get('esearchresult', {}).get('idlist'):
