@@ -10,8 +10,8 @@ setup(
     description='EBI EVA - Common Python Utilities',
     url='https://github.com/EBIVariation/eva-common-pyutils',
     keywords=['EBI', 'EVA', 'PYTHON', 'UTILITIES'],
-    install_requires=['psycopg2-binary<=2.8', 'requests', 'pymongo', 'lxml', 'pyyaml', 'cached-property', 'retry',
-                      'networkx'],
+    install_requires=['psycopg2-binary', 'requests', 'pymongo', 'lxml', 'pyyaml', 'cached-property', 'retry',
+                      'networkx<=2.5'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
