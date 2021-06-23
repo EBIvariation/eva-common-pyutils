@@ -14,8 +14,8 @@
 import os
 import urllib
 from csv import DictReader, excel_tab
-from ftplib import FTP
 import re
+import requests
 from urllib import request
 
 from cached_property import cached_property
@@ -84,38 +84,27 @@ class NCBIAssembly(AppLogger):
         request.urlcleanup()
 
     @cached_property
+    @retry(tries=4, delay=2, backoff=1.2, jitter=(1, 3))
     def _ncbi_genome_folder_url_and_content(self):
         """
         Internal property that retrieve and store the NCBI ftp url and content of the genome folder.
         """
-        ftp = FTP('ftp.ncbi.nlm.nih.gov', timeout=600)
-        ftp.login('anonymous', 'anonymous')
-        genome_folder = 'genomes/all/' + '/'.join([self.assembly_accession[0:3], self.assembly_accession[4:7],
-                                                   self.assembly_accession[7:10],
-                                                   self.assembly_accession[10:13]]) + '/'
-        ftp.cwd(genome_folder)
-        all_genome_subfolders = []
-        ftp.retrlines('NLST', lambda line: all_genome_subfolders.append(line))
+        EUTILS_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
+        ESEARCH_URL = EUTILS_URL + 'esearch.fcgi'
+        ESUMMARY_URL = EUTILS_URL + 'esummary.fcgi'
 
-        genome_subfolders = [folder for folder in all_genome_subfolders if folder == self.assembly_accession]
-        if len(genome_subfolders) != 1:
-            self.debug('Cannot find good match for accession folder with "%s": %s match found', self.assembly_accession, len(genome_subfolders))
-            genome_subfolders = [folder for folder in all_genome_subfolders if folder.startswith(self.assembly_accession + '_')]
-        if len(genome_subfolders) != 1:
-            self.debug('Cannot find good match for accession folder with "starting with %s_": %s match found', self.assembly_accession, len(genome_subfolders))
-            genome_subfolders = [folder for folder in all_genome_subfolders if folder.startswith(self.assembly_accession)]
-        if len(genome_subfolders) != 1:
-            self.debug('Cannot find good match for accession folder with "starting with %s": %s match found', self.assembly_accession, len(genome_subfolders))
-            genome_subfolders = [folder for folder in all_genome_subfolders if self.assembly_accession in folder]
-        if len(genome_subfolders) != 1:
-            self.debug('Cannot find good match for accession folder with "%s in name": %s match found', self.assembly_accession, len(genome_subfolders))
-            raise Exception('more than one folder matches the assembly accession: ' + str(genome_subfolders))
-        ftp.cwd(genome_subfolders[0])
-        genome_files = []
-        ftp.retrlines('NLST', lambda line: genome_files.append(line))
-        url = 'ftp://' + 'ftp.ncbi.nlm.nih.gov' + '/' + genome_folder + genome_subfolders[0]
-        ftp.close()
-        return url, genome_files
+        payload = {'db': 'Assembly', 'term': '"{}"'.format(self.assembly_accession), 'retmode': 'JSON'}
+        assembly_results = requests.get(ESEARCH_URL, params=payload).json()
+
+        if assembly_results and assembly_results.get('esearchresult', {}).get('idlist'):
+            assembly_id = assembly_results.get('esearchresult').get('idlist')[0]
+            payload = {'db': 'Assembly', 'id': assembly_id, 'retmode': 'JSON'}
+            summary_result = requests.get(ESUMMARY_URL, params=payload).json()
+            if "result" in summary_result:
+                url = summary_result["result"][str(assembly_id)]["ftppath_assembly_rpt"]
+                return url, [os.path.basename(url)]
+
+        raise Exception("Could not find assembly report for: " + self.assembly_accession)
 
     @cached_property
     def assembly_report_url(self):
