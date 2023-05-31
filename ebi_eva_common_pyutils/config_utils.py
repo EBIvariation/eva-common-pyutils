@@ -52,7 +52,7 @@ def get_metadata_creds_for_profile(profile_name: str, settings_xml_file: str):
 
 def get_mongo_creds_for_profile(profile_name: str, settings_xml_file: str):
     """
-    Gets primary host, username, and password for mongo database.
+    Gets host, username, and password for mongo database.
     Useful for filling properties files, for connection purposes it is preferable to use
     `mongo_utils.get_mongo_connection_handle` as that will handle multiple hosts appropriately.
     """

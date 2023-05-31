@@ -70,7 +70,7 @@ class TestDatabaseConfig(TestCommon):
             'mongodb://localhost:27017'
         )
 
-    def test_get_primary_mongo_creds_for_profile(self):
+    def test_get_mongo_creds_for_profile(self):
         self.assertEqual(
             get_mongo_creds_for_profile('test', self.config_file),
             ('mongo.example.com:27017,mongo.example-primary.com:27017', 'testuser', 'testpassword')
