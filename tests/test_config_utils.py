@@ -15,7 +15,7 @@ import os
 from lxml.etree import XPathEvalError
 
 from ebi_eva_common_pyutils.config_utils import EVAPrivateSettingsXMLConfig, get_pg_metadata_uri_for_eva_profile, \
-    get_mongo_uri_for_eva_profile, get_primary_mongo_creds_for_profile
+    get_mongo_uri_for_eva_profile, get_mongo_creds_for_profile
 from tests.test_common import TestCommon
 
 
@@ -72,10 +72,10 @@ class TestDatabaseConfig(TestCommon):
 
     def test_get_primary_mongo_creds_for_profile(self):
         self.assertEqual(
-            get_primary_mongo_creds_for_profile('test', self.config_file),
-            ('mongo.example-primary.com', 'testuser', 'testpassword')
+            get_mongo_creds_for_profile('test', self.config_file),
+            ('mongo.example.com:27017,mongo.example-primary.com:27017', 'testuser', 'testpassword')
         )
         self.assertEqual(
-            get_primary_mongo_creds_for_profile('local', self.config_file),
-            ('localhost', None, None)
+            get_mongo_creds_for_profile('local', self.config_file),
+            ('localhost:27017', None, None)
         )
