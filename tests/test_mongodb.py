@@ -6,8 +6,8 @@ from pymongo import WriteConcern, ReadPreference
 from pymongo.read_concern import ReadConcern
 
 from ebi_eva_common_pyutils.command_utils import run_command_with_output
-from ebi_eva_common_pyutils.mongo_utils import get_mongo_connection_handle
-from ebi_eva_common_pyutils.mongodb import MongoDatabase
+from ebi_eva_internal_pyutils.mongo_utils import get_mongo_connection_handle
+from ebi_eva_internal_pyutils.mongodb import MongoDatabase
 from tests.test_common import TestCommon
 
 
