@@ -3,7 +3,7 @@ import shutil
 import tarfile
 from unittest import TestCase
 
-from ebi_eva_common_pyutils.archive_directory import archive_directory
+from ebi_eva_internal_pyutils.archive_directory import archive_directory
 
 
 class TestArchive(TestCase):

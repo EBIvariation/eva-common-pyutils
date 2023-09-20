@@ -1,7 +1,7 @@
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-from ebi_eva_common_pyutils.metadata_utils import resolve_variant_warehouse_db_name, get_taxonomy_code_from_metadata, \
+from ebi_eva_internal_pyutils.metadata_utils import resolve_variant_warehouse_db_name, get_taxonomy_code_from_metadata, \
     get_assembly_code_from_metadata, insert_new_assembly_and_taxonomy, build_taxonomy_code, \
     ensure_taxonomy_is_in_evapro, insert_assembly_in_evapro, update_accessioning_status
 
