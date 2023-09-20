@@ -15,7 +15,7 @@
 import http
 import requests
 
-from ebi_eva_common_pyutils.assembly import NCBIAssembly
+from ebi_eva_common_pyutils.reference import NCBIAssembly
 from ebi_eva_common_pyutils.logger import logging_config as log_cfg
 
 EUTILS_URL = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
