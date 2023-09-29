@@ -15,7 +15,7 @@ class TestMongoDatabase(TestCommon):
     dump_db_name = "test_mongo_db"
     uri = "mongodb://localhost:27017/admin"
     local_mongo_handle = pymongo.MongoClient()
-    config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'resources/test_config_file.xml')
+    config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../resources/test_config_file.xml')
 
     # Tests expect a local sharded Mongo instance
     def setUp(self) -> None:
