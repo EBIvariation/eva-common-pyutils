@@ -14,7 +14,7 @@
 import os
 from lxml.etree import XPathEvalError
 
-from ebi_eva_common_pyutils.config_utils import EVAPrivateSettingsXMLConfig, get_pg_metadata_uri_for_eva_profile, \
+from ebi_eva_internal_pyutils.config_utils import EVAPrivateSettingsXMLConfig, get_pg_metadata_uri_for_eva_profile, \
     get_mongo_uri_for_eva_profile, get_mongo_creds_for_profile
 from tests.test_common import TestCommon
 
