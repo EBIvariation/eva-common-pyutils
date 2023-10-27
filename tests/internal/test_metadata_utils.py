@@ -45,7 +45,9 @@ class TestMetadata(TestCase):
             ('GCA_008746955.1', 8839, 'eva_aplatyrhynchos_cauwild10'),
             ('GCA_018584345.1', 3316, 'eva_tplicata_redcedarv3'),
             ('GCA_000004695.1', 352472, 'eva_ddiscoideumax4_dicty27'),
-            ('GCA_015227675.2', 10116, 'eva_rnorvegicus_mratbn72')
+            ('GCA_015227675.2', 10116, 'eva_rnorvegicus_mratbn72'),
+            # grcm38.p1
+            ('GCA_000001635.3', 10090, 'eva_mmusculus_grcm38')
         ]
         # No lookup to the database
         db_handle = MagicMock()
