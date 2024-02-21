@@ -23,7 +23,7 @@ logger = log_cfg.get_logger(__name__)
 
 def run_command_with_output(command_description, command, return_process_output=False,
                             log_error_stream_to_output=False, stdout_log_level=logging.INFO,
-                            stderr_log_level=logging.INFO):
+                            stderr_log_level=logging.ERROR):
     process_output = ""
 
     logger.info("Starting process: " + command_description)
