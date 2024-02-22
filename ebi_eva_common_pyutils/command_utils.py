@@ -13,10 +13,8 @@
 # limitations under the License.
 import logging
 import subprocess
-from select import select
-from threading import Thread
 
-from ebi_eva_common_pyutils.logger import logging_config as log_cfg, AppLogger
+from ebi_eva_common_pyutils.logger import logging_config as log_cfg
 
 logger = log_cfg.get_logger(__name__)
 
@@ -26,8 +24,8 @@ def run_command_with_output(command_description, command, return_process_output=
                             stderr_log_level=logging.ERROR):
     process_output = ""
 
-    logger.info("Starting process: " + command_description)
-    logger.info("Running command: " + command)
+    logger.log(stdout_log_level, "Starting process: " + command_description)
+    logger.log(stdout_log_level, "Running command: " + command)
 
     stdout = subprocess.PIPE
     # Some lame utilities like mongodump and mongorestore output non-error messages to error stream
@@ -49,7 +47,7 @@ def run_command_with_output(command_description, command, return_process_output=
         logger.error(command_description + " failed! Refer to the error messages for details.")
         raise subprocess.CalledProcessError(process.returncode, process.args)
     else:
-        logger.info(command_description + " - completed successfully")
+        logger.log(stdout_log_level, command_description + " - completed successfully")
     if return_process_output:
         return process_output
 
