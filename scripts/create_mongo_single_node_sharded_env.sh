@@ -5,7 +5,7 @@ systemctl stop mongod || true
 apt-get remove mongodb-org -y || true
 apt-get autoremove --purge || true
 
-# Proceed with specific MongoDB, Mongosh and MongoDB Command Line Database Tools version installation
+# Proceed with specific MongoDB and Mongosh version installation
 export mongodb_version=$1
 export mongosh_version=$2
 
