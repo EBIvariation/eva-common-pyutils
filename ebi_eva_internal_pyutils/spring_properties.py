@@ -128,7 +128,7 @@ class SpringPropertiesGenerator:
             'accessioning.monotonic.rs.blockSize': 100000,
             'accessioning.monotonic.rs.blockStartValue': 3000000000,
             'accessioning.monotonic.rs.nextBlockInterval': 1000000000,
-            # This is value is not used but is required to create beans in Java
+            # This value is not used but is required to create beans in Java
             'recovery.cutoff.days': 9999999
         }
         merge = {**self._common_accessioning_properties(assembly_accession, read_preference, chunk_size), **props}
