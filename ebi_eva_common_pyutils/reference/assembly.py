@@ -235,13 +235,14 @@ class NCBIAssembly(AppLogger):
         self.info('Downloading ' + contig_accession)
         urllib.request.urlretrieve(url, output_file)
 
-    def download_or_construct(self, genbank_only=False, overwrite=False):
+    def download_or_construct(self, genbank_only=False, overwrite=False, update=False):
         """First download the assembly report and fasta from the FTP, then append any missing contig from
         the assembly report to the assembly fasta."""
-        self.download_assembly_report(overwrite)
-        try:
-            self.download_assembly_fasta(overwrite)
-        except:
-            pass
+        if update:
+            self.download_assembly_report(overwrite)
+            try:
+                self.download_assembly_fasta(overwrite)
+            except:
+                pass
         # This will either confirm the presence of all the contig or download any one missing
         self.construct_fasta_from_report(genbank_only)
