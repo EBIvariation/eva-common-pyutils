@@ -27,7 +27,7 @@ class LoggingConfiguration:
     default_fmt = '[%(asctime)s][%(name)s][%(levelname)s] %(message)s'
     default_datefmt = '%Y-%b-%d %H:%M:%S'
 
-    def __init__(self, use_existing_logger=True, log_level=logging.INFO):
+    def __init__(self, use_existing_logger=True, log_level=logging.DEBUG):
         self.blank_formatter = logging.Formatter()
         self.handlers = set()
         if use_existing_logger:
@@ -38,6 +38,8 @@ class LoggingConfiguration:
         else:
             self.loggers = {}
         self._log_level = log_level
+        if log_level is not None:
+            self.set_log_level(log_level)
 
     @cached_property
     def formatter(self):
@@ -61,8 +63,8 @@ class LoggingConfiguration:
         else:
             logger = logging.getLogger(name)
             self.loggers[name] = logger
-
-        logger.setLevel(level or self._log_level)
+        log_level = level if level > self._log_level else self._log_level
+        logger.setLevel(log_level)
         for h in self.handlers:
             logger.addHandler(h)
 
@@ -74,19 +76,20 @@ class LoggingConfiguration:
         :param logging.Handler handler:
         :param int level: Log level to assign to the created handler
         """
-        handler.setLevel(level or self._log_level)
+        log_level = level if level > self._log_level else self._log_level
+        handler.setLevel(log_level)
         handler.setFormatter(self.formatter)
         for name in self.loggers:
             self.loggers[name].addHandler(handler)
         self.handlers.add(handler)
 
-    def add_stdout_handler(self, level=None):
+    def add_stdout_handler(self, level=logging.INFO):
         self.add_handler(logging.StreamHandler(stdout), level=level or self._log_level)
 
-    def add_stderr_handler(self, level=None):
+    def add_stderr_handler(self, level=logging.INFO):
         self.add_handler(logging.StreamHandler(stderr), level=level or self._log_level)
 
-    def add_file_handler(self, filename, level=None):
+    def add_file_handler(self, filename, level=logging.INFO):
         self.add_handler(logging.FileHandler(filename=filename), level=level or self._log_level)
 
     def set_log_level(self, level):
