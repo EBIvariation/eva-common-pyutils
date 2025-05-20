@@ -43,6 +43,14 @@ class TestLoggingConfiguration(TestCommon):
         assert h.formatter is self.log_cfg.formatter
         assert h.level == logging.DEBUG
 
+    def test_set_log_level(self):
+        h = logging.StreamHandler(stream=sys.stdout)
+        self.log_cfg.add_handler(h, level=logging.INFO)
+        l = self.log_cfg.get_logger('a_logger')
+        assert h.level == logging.INFO
+        assert l.level == logging.DEBUG
+        self.log_cfg.set_log_level(logging.DEBUG)
+        assert h.level == l.level == logging.DEBUG
 
     def test_set_formatter(self):
         h = logging.StreamHandler(stream=sys.stdout)
