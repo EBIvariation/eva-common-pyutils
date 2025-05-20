@@ -238,7 +238,7 @@ class NCBIAssembly(AppLogger):
     def download_or_construct(self, genbank_only=False, overwrite=False, update=False):
         """First download the assembly report and fasta from the FTP, then append any missing contig from
         the assembly report to the assembly fasta."""
-        if update:
+        if not update or overwrite:
             self.download_assembly_report(overwrite)
             try:
                 self.download_assembly_fasta(overwrite)
