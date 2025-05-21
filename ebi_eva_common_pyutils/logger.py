@@ -22,7 +22,7 @@ from cached_property import cached_property
 #  - Formatter describe what is included in the lo message
 #  - Handler Propagate them to where they should go (file/screen, ...)
 # Logger are part of hierarchy and always have parent up to the root logger.
-# The root logger is usually se to WARNING level
+# The root logger is usually set to WARNING level
 # When a log is emitted to a logger, the logger checks it own level and propagate to its handler.
 # If it does not have any handlers it propagates to its parent (unless propagate is set to false)
 #
