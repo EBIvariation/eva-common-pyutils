@@ -6,8 +6,8 @@ from pymongo import WriteConcern, ReadPreference
 from pymongo.read_concern import ReadConcern
 
 from ebi_eva_common_pyutils.command_utils import run_command_with_output
+from ebi_eva_internal_pyutils.mongodb.mongo_database import MongoDatabase
 from ebi_eva_internal_pyutils.mongo_utils import get_mongo_connection_handle
-from ebi_eva_internal_pyutils.mongodb import MongoDatabase
 from tests.test_common import TestCommon
 
 
@@ -30,10 +30,11 @@ class TestMongoDatabase(TestCommon):
 
     def _restore_data_to_another_db(self):
         with tempfile.TemporaryDirectory() as tempdir:
+            os.makedirs(tempdir, exist_ok=True)
             self.test_mongo_db.dump_data(tempdir)
             test_restore_db = MongoDatabase(uri=self.uri, db_name=self.test_mongo_db.db_name + "_restore")
             test_restore_db.drop()
-            test_restore_db.restore_data(dump_dir=tempdir,
+            test_restore_db.restore_data(dump_dir=os.path.join(tempdir, self.test_mongo_db.db_name),
                                          mongorestore_args={
                                              "nsFrom": f'"{self.test_mongo_db.db_name}.*"',
                                              "nsTo": f'"{test_restore_db.db_name}.*"'})
@@ -111,6 +112,8 @@ class TestMongoDatabase(TestCommon):
 
     def test_enable_sharding(self):
         self.test_mongo_db.enable_sharding()
+        print(list(self.local_mongo_handle["config"]["databases"]
+                                 .find({"_id": self.test_mongo_db.db_name})))
         # Query meta-collection in the config database to check sharding status
         self.assertTrue(len(list(self.local_mongo_handle["config"]["databases"]
                                  .find({"_id": self.test_mongo_db.db_name, "partitioned": True}))) > 0)
