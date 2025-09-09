@@ -101,6 +101,7 @@ class MongoDatabase(AppLogger):
                 self.mongo_handle[self.db_name][collection_name].create_index(index_keys, name=name, **index_info)
 
     def enable_sharding(self):
+        # From mongodb 6.0 all database have sharding enable by default
         self.mongo_handle.admin.command({"enableSharding": self.db_name})
 
     def shard_collections(self, collections_shard_key_map, collections_to_shard):
@@ -145,7 +146,6 @@ class MongoDatabase(AppLogger):
                                f"--dir {dump_dir} "
         mongorestore_command += self._get_optional_secrets_file_stdin()
         try:
-            print(mongorestore_command)
             run_command_with_output("mongorestore", mongorestore_command, log_error_stream_to_output=True)
         except subprocess.CalledProcessError as ex:
             raise Exception("mongorestore failed! HINT: Did you forget to provide a secrets file for authentication?")
