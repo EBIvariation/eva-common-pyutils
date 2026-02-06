@@ -132,9 +132,9 @@ class SpringPropertiesGenerator:
         merge = {**self._common_accessioning_properties(assembly_accession, read_preference, chunk_size), **props}
         return merge
 
-    def get_accessioning_properties(self, *, read_preference='primary', job_name=None, target_assembly=None, fasta=None,
-                                    assembly_report=None, project_accession=None, aggregation='BASIC',
-                                    taxonomy_accession=None, vcf_file='', output_vcf='', duplicate_ss_acc_file='',
+    def get_accessioning_properties(self, *, read_preference='primary', job_name=None, target_assembly='', fasta='',
+                                    assembly_report='', project_accession='', aggregation='BASIC',
+                                    taxonomy_accession='', vcf_file='', output_vcf='', duplicate_ss_acc_file='',
                                     chunk_size=100):
         """Properties for accessioning pipeline."""
         return self._format(
