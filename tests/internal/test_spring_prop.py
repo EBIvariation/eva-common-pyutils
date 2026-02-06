@@ -185,6 +185,55 @@ recovery.cutoff.days=9999999
             taxonomy_accession='9906', vcf_file='/path/to/vcf_file.vcf', output_vcf='/path/to/output_vcf.vcf',
             duplicate_ss_acc_file='/path/to/duplicate_ss_acc_file.vcf') == expected
 
+    def test_get_accessioning_properties_without_params(self):
+        expected = '''spring.data.mongodb.uri=mongodb://mongouser:mongop%40ssword@mongos-host1.example.com:27017,mongos-host2.example.com:27017/?retryWrites=true&authSource=admin
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.tomcat.max-active=3
+spring.jpa.generate-ddl=true
+spring.main.web-application-type=none
+spring.main.allow-bean-definition-overriding=true
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true
+spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults=false
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect
+spring.datasource.hikari.maximum-pool-size=2
+spring.datasource.url=jdbc:postgresql://host1.example.com:5432/accjtdb
+spring.datasource.username=accuser
+spring.datasource.password=accpassword
+spring.data.mongodb.database=eva_accession_sharded
+spring.batch.job.names=
+
+eva.count-stats.url=https://www.ebi.ac.uk/eva/webservices/count-stats
+eva.count-stats.username=statsuser
+eva.count-stats.password=statspassword
+
+mongodb.read-preference=primary
+
+parameters.chunkSize=100
+parameters.assemblyAccession=
+parameters.assemblyReportUrl=
+parameters.contigNaming=NO_REPLACEMENT
+parameters.fasta=
+parameters.forceRestart=false
+parameters.projectAccession=
+parameters.taxonomyAccession=
+parameters.vcfAggregation=BASIC
+parameters.vcf=
+parameters.outputVcf=
+parameters.duplicateSSAccFile=
+
+accessioning.submitted.categoryId=ss
+accessioning.clustered.categoryId=rs
+accessioning.monotonic.ss.blockSize=100000
+accessioning.monotonic.ss.blockStartValue=5000000000
+accessioning.monotonic.ss.nextBlockInterval=1000000000
+accessioning.monotonic.rs.blockSize=100000
+accessioning.monotonic.rs.blockStartValue=3000000000
+accessioning.monotonic.rs.nextBlockInterval=1000000000
+
+recovery.cutoff.days=9999999
+'''
+        assert self.prop.get_accessioning_properties() == expected
+
     def test_get_variant_load_properties(self):
         expected = '''spring.data.mongodb.uri=mongodb://mongouser:mongop%40ssword@mongos-host1.example.com:27017,mongos-host2.example.com:27017/?retryWrites=true&authSource=admin
 spring.datasource.driver-class-name=org.postgresql.Driver
