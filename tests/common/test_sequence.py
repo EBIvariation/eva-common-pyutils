@@ -21,6 +21,13 @@ class TestNCBISequence(TestCommon):
         NCBISequence.check_genbank_accession_format('AJ312413.2')
         self.assertRaises(ValueError, NCBISequence.check_genbank_accession_format, 'NM_017001.2')
 
+    def test_insdc_only(self):
+        NCBISequence('AJ312413.2', 'Tribolium castaneum', self.genome_folder, insdc_only=True)
+        self.assertRaises(
+            ValueError, NCBISequence,
+            'NM_017001.2', 'Rattus norvegicus', self.genome_folder, insdc_only=True
+        )
+
     def test_download_assembly_fasta_fail(self):
         sequence = NCBISequence('NM_017001.2', 'Rattus norvegicus', self.genome_folder)
         self.assertFalse(os.path.isfile(sequence.sequence_fasta_path))

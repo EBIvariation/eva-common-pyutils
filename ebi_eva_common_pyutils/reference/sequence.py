@@ -45,7 +45,10 @@ class NCBISequence(AppLogger):
         r'[A-Z]{6}[0-9]{9}\.[0-9]+'
     ]
 
-    def __init__(self, sequence_accession, species_scientific_name, reference_directory, eutils_api_key=None):
+    def __init__(self, sequence_accession, species_scientific_name, reference_directory, eutils_api_key=None,
+                 genbank_only=False):
+        if genbank_only:
+            self.check_genbank_accession_format(sequence_accession)
         self.sequence_accession = sequence_accession
         self.species_scientific_name = species_scientific_name
         self.reference_directory = reference_directory
@@ -77,9 +80,7 @@ class NCBISequence(AppLogger):
     def sequence_fasta_path(self):
         return os.path.join(self.sequence_directory, self.sequence_accession + '.fa')
 
-    def download_contig_sequence_from_ncbi(self, genbank_only=True):
-        if genbank_only:
-            self.check_genbank_accession_format(self.sequence_accession)
+    def download_contig_sequence_from_ncbi(self):
         self._download_contig_from_ncbi(self.sequence_accession, self.sequence_fasta_path)
         self.info(self.sequence_fasta_path + " downloaded and added to FASTA sequence")
 

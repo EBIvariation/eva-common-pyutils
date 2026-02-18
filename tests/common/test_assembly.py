@@ -40,6 +40,19 @@ class TestNCBIAssembly(TestCommon):
     def test_check_assembly_accession_format(self):
         self.assertRaises(ValueError, NCBIAssembly.check_assembly_accession_format, 'TTT_000008865.1')
 
+    def test_check_insdc_accession_format(self):
+        self.assertTrue(NCBIAssembly.is_insdc_accession_format('GCA_000008865.1'))
+        self.assertFalse(NCBIAssembly.is_insdc_accession_format('GCF_000008865.1'))
+        NCBIAssembly.check_insdc_accession_format('GCA_000008865.1')
+        self.assertRaises(ValueError, NCBIAssembly.check_insdc_accession_format, 'GCF_000008865.1')
+
+    def test_genbank_only(self):
+        NCBIAssembly('GCA_000008865.1', 'Escherichia coli', self.genome_folder, genbank_only=True)
+        self.assertRaises(
+            ValueError, NCBIAssembly,
+            'GCF_000008865.1', 'Escherichia coli', self.genome_folder, genbank_only=True
+        )
+
     def test_get_assembly_report_rows(self):
         expected_lines = [
             {'# Sequence-Name': 'ANONYMOUS', 'Sequence-Role': 'assembled-molecule', 'Assigned-Molecule': 'na',
@@ -89,16 +102,6 @@ class TestNCBIAssembly(TestCommon):
         self.assertEqual(
             NCBIAssembly.get_written_contigs(self.assembly_from_report.assembly_fasta_path),
             ['NW_017892567.1']
-        )
-
-    def test_construct_fasta_from_report_genbank_only(self):
-        with open(self.assembly_from_report.assembly_report_path, 'w') as open_file:
-            lines = ['\t'.join(l) for l in [self.assembly_report_header, self.assembly_report_line1_no_genbank]]
-            open_file.write('\n'.join(lines))
-        self.assertRaises(
-            ValueError,
-            self.assembly_from_report.construct_fasta_from_report,
-            genbank_only=True
         )
 
     def test_download_or_construct(self):
