@@ -2,10 +2,10 @@
 Changelog for ebi_eva_common_pyutils
 ===========================
 
-## 0.8.3 (unreleased)
+## 0.8.3 (2026-02-19)
 ---------------------
 
-- Nothing changed yet.
+- Add option to limit assembly and sequence to genbank  
 
 
 ## 0.8.2 (2026-02-05)
