@@ -41,10 +41,10 @@ class TestNCBIAssembly(TestCommon):
         self.assertRaises(ValueError, NCBIAssembly.check_assembly_accession_format, 'TTT_000008865.1')
 
     def test_check_insdc_accession_format(self):
-        self.assertTrue(NCBIAssembly.is_insdc_accession_format('GCA_000008865.1'))
-        self.assertFalse(NCBIAssembly.is_insdc_accession_format('GCF_000008865.1'))
-        NCBIAssembly.check_insdc_accession_format('GCA_000008865.1')
-        self.assertRaises(ValueError, NCBIAssembly.check_insdc_accession_format, 'GCF_000008865.1')
+        self.assertTrue(NCBIAssembly.is_genbank_accession_format('GCA_000008865.1'))
+        self.assertFalse(NCBIAssembly.is_genbank_accession_format('GCF_000008865.1'))
+        NCBIAssembly.check_genbank_accession_format('GCA_000008865.1')
+        self.assertRaises(ValueError, NCBIAssembly.check_genbank_accession_format, 'GCF_000008865.1')
 
     def test_genbank_only(self):
         NCBIAssembly('GCA_000008865.1', 'Escherichia coli', self.genome_folder, genbank_only=True)

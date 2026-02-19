@@ -42,7 +42,7 @@ class NCBIAssembly(AppLogger):
                  genbank_only=False):
         self.check_assembly_accession_format(assembly_accession)
         if genbank_only:
-            self.check_insdc_accession_format(assembly_accession)
+            self.check_genbank_accession_format(assembly_accession)
         self.genbank_only = genbank_only
         self.assembly_accession = assembly_accession
         self.species_scientific_name = species_scientific_name
@@ -62,12 +62,12 @@ class NCBIAssembly(AppLogger):
                             'GCF_XXXXXXXXX.X or GCA_XXXXXXXXX.X where X is a number')
 
     @staticmethod
-    def is_insdc_accession_format(assembly_accession):
+    def is_genbank_accession_format(assembly_accession):
         return assembly_accession.startswith('GCA_')
 
     @staticmethod
-    def check_insdc_accession_format(assembly_accession):
-        if not NCBIAssembly.is_insdc_accession_format(assembly_accession):
+    def check_genbank_accession_format(assembly_accession):
+        if not NCBIAssembly.is_genbank_accession_format(assembly_accession):
             raise ValueError(f'Assembly accession {assembly_accession} is not a valid INSDC (GCA) accession')
 
     @property
