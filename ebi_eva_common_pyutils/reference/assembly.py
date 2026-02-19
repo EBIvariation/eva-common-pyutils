@@ -38,8 +38,12 @@ class NCBIAssembly(AppLogger):
     the eutils_api_key is only used to retrieve additional contigs if required.
     """
 
-    def __init__(self, assembly_accession, species_scientific_name, reference_directory, eutils_api_key=None):
+    def __init__(self, assembly_accession, species_scientific_name, reference_directory, eutils_api_key=None,
+                 genbank_only=False):
         self.check_assembly_accession_format(assembly_accession)
+        if genbank_only:
+            self.check_genbank_accession_format(assembly_accession)
+        self.genbank_only = genbank_only
         self.assembly_accession = assembly_accession
         self.species_scientific_name = species_scientific_name
         self.reference_directory = reference_directory
@@ -56,6 +60,15 @@ class NCBIAssembly(AppLogger):
         if not NCBIAssembly.is_assembly_accession_format(assembly_accession):
             raise ValueError(f'Invalid assembly accession: {assembly_accession} it has to be in the form of '
                             'GCF_XXXXXXXXX.X or GCA_XXXXXXXXX.X where X is a number')
+
+    @staticmethod
+    def is_genbank_accession_format(assembly_accession):
+        return assembly_accession.startswith('GCA_')
+
+    @staticmethod
+    def check_genbank_accession_format(assembly_accession):
+        if not NCBIAssembly.is_genbank_accession_format(assembly_accession):
+            raise ValueError(f'Assembly accession {assembly_accession} is not a valid INSDC (GCA) accession')
 
     @property
     def assembly_directory(self):
@@ -171,7 +184,7 @@ class NCBIAssembly(AppLogger):
                 'gunzip -f {}'.format(self.assembly_compressed_fasta_path)
             )
 
-    def construct_fasta_from_report(self, genbank_only=False):
+    def construct_fasta_from_report(self):
         """
         Download the assembly report if it does not exist then create the assembly fasta from the contig.
         If the assembly already exist then it only add any missing contig.
@@ -183,13 +196,14 @@ class NCBIAssembly(AppLogger):
             refseq_accession = row['RefSeq-Accn']
             relationship = row['Relationship']
             accession = genbank_accession
-            if relationship != '=' and genbank_accession == 'na' and not genbank_only:
+            if relationship != '=' and genbank_accession == 'na' and not self.genbank_only:
                 accession = refseq_accession
             if accession in written_contigs:
                 self.debug('Accession ' + accession + ' already in the FASTA file, don\'t need to be downloaded')
                 continue
             if not accession or accession == 'na':
-                raise ValueError('Accession {} found in report is not valid'.format(accession))
+                self.warning('Accession {} found in report will not be downloaded'.format(accession))
+                continue
             contig_to_append.append(self.download_contig_sequence_from_ncbi(accession))
 
         # Now append all the new contigs to the existing fasta
@@ -235,11 +249,10 @@ class NCBIAssembly(AppLogger):
         self.info('Downloading ' + contig_accession)
         urllib.request.urlretrieve(url, output_file)
 
-    def download_or_construct(self, genbank_only=False, overwrite=False):
+    def download_or_construct(self, overwrite=False):
         """
         First download the assembly report and fasta from the FTP, then append any missing contig from
         the assembly report to the assembly fasta.
-        Setting genbank_only = True ensure that only contigs that have genbank accession will be added to the assembly fasta.
         Setting overwrite = True delete any existing fasta file and assembly report. then download them again.
         """
         self.download_assembly_report(overwrite)
@@ -248,4 +261,4 @@ class NCBIAssembly(AppLogger):
         except:
             pass
         # This will either confirm the presence of all the contig or download any one missing
-        self.construct_fasta_from_report(genbank_only)
+        self.construct_fasta_from_report()

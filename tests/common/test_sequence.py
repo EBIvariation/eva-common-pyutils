@@ -21,19 +21,16 @@ class TestNCBISequence(TestCommon):
         NCBISequence.check_genbank_accession_format('AJ312413.2')
         self.assertRaises(ValueError, NCBISequence.check_genbank_accession_format, 'NM_017001.2')
 
-    def test_download_assembly_fasta_fail(self):
-        sequence = NCBISequence('NM_017001.2', 'Rattus norvegicus', self.genome_folder)
-        self.assertFalse(os.path.isfile(sequence.sequence_fasta_path))
-        self.assertRaises(ValueError, sequence.download_contig_sequence_from_ncbi)
+    def test_genbank_only(self):
+        NCBISequence('AJ312413.2', 'Tribolium castaneum', self.genome_folder, genbank_only=True)
+        self.assertRaises(
+            ValueError, NCBISequence,
+            'NM_017001.2', 'Rattus norvegicus', self.genome_folder, genbank_only=True
+        )
 
     def test_download_assembly_fasta(self):
-        sequence = NCBISequence('NM_017001.2', 'Rattus norvegicus', self.genome_folder)
-        self.assertFalse(os.path.isfile(sequence.sequence_fasta_path))
-        sequence.download_contig_sequence_from_ncbi(genbank_only=False)
-        self.assertTrue(os.path.isfile(sequence.sequence_fasta_path))
-
         sequence = NCBISequence('AJ312413.2', 'Tribolium castaneum', self.genome_folder)
         self.assertFalse(os.path.isfile(sequence.sequence_fasta_path))
-        sequence.download_contig_sequence_from_ncbi(genbank_only=True)
+        sequence.download_contig_sequence_from_ncbi()
         self.assertTrue(os.path.isfile(sequence.sequence_fasta_path))
 
