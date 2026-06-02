@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ master, java-21 ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
@@ -18,7 +21,7 @@ jobs:
         mongodb-version: [ubuntu2204-6.0.6]
         mongotools_version : [ubuntu2204-x86_64-100.13.0]
         mongosh-version: [1.10.6]
-        python-version: [3.8, 3.9]
+        python-version: [3.11]
         java-version: [1.11]
 
     steps:
