@@ -15,7 +15,7 @@ from collections import defaultdict
 from urllib.parse import quote_plus
 
 from ebi_eva_internal_pyutils.config_utils import get_mongo_creds_for_profile, get_accession_pg_creds_for_profile, \
-    get_count_service_creds_for_profile, get_properties_from_xml_file, get_variant_load_job_tracker_creds_for_profile
+    get_count_service_creds_for_profile, get_properties_from_xml_file
 
 
 class SpringPropertiesGenerator:
@@ -62,15 +62,6 @@ class SpringPropertiesGenerator:
             'spring.data.mongodb.uri': f'mongodb://{username_with_password}{mongo_host}/?retryWrites=true&authSource=admin',
         }
 
-    def _variant_load_job_tracker_properties(self):
-        variant_url, variant_user, variant_pass = get_variant_load_job_tracker_creds_for_profile(self.maven_profile,
-                                                                                                 self.private_settings_file)
-        return {
-            'job.repository.url': variant_url,
-            'job.repository.username': variant_user,
-            'job.repository.password': variant_pass,
-        }
-
     def _count_stats_properties(self):
         counts_url, counts_username, counts_password = get_count_service_creds_for_profile(
             self.maven_profile, self.private_settings_file)
@@ -80,22 +71,14 @@ class SpringPropertiesGenerator:
             'eva.count-stats.password': counts_password
         }
 
-    def _common_properties(self, *, read_preference='primary', chunk_size=100, max_pool_size=2):
+    def _common_properties(self, *, read_preference='primary', chunk_size=100):
         """Properties common to all Spring pipelines"""
         props = {
-            'spring.datasource.driver-class-name': 'org.postgresql.Driver',
-            'spring.datasource.tomcat.max-active': 3,
-            'spring.jpa.generate-ddl': 'true',
-
             'mongodb.read-preference': read_preference,
 
             'spring.main.web-application-type': 'none',
             'spring.main.allow-bean-definition-overriding': 'true',
-            'spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation': 'true',
-            'spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults': 'false',
-            'spring.jpa.database-platform': 'org.hibernate.dialect.PostgreSQL9Dialect',
             'parameters.chunkSize': chunk_size,
-            'spring.datasource.hikari.maximum-pool-size': max_pool_size
         }
         merge = {**self._mongo_properties(), **self._count_stats_properties(), **props}
         return merge
@@ -105,9 +88,10 @@ class SpringPropertiesGenerator:
         accession_db = get_properties_from_xml_file(
             self.maven_profile, self.private_settings_file)['eva.accession.mongo.database']
         props = {
-            'spring.datasource.url': pg_url,
-            'spring.datasource.username': pg_user,
-            'spring.datasource.password': pg_pass,
+            'continuous.id.blocks.datasource.driver-class-name': 'org.postgresql.Driver',
+            'continuous.id.blocks.datasource.jdbc-url': pg_url,
+            'continuous.id.blocks.datasource.username': pg_user,
+            'continuous.id.blocks.datasource.password': pg_pass,
             'spring.data.mongodb.database': accession_db,
             'parameters.assemblyAccession': assembly_accession,
         }
@@ -146,7 +130,6 @@ class SpringPropertiesGenerator:
                 'parameters.assemblyReportUrl': self._format_str('file:{0}', assembly_report),
                 'parameters.contigNaming': 'NO_REPLACEMENT',
                 'parameters.fasta': fasta,
-                'parameters.forceRestart': 'false',
                 'parameters.projectAccession': project_accession,
                 'parameters.taxonomyAccession': taxonomy_accession,
                 'parameters.vcfAggregation': aggregation,
@@ -234,7 +217,7 @@ class SpringPropertiesGenerator:
                 'logging.level.uk.ac.ebi.eva.accession.release': 'INFO'
             })
 
-    def _common_eva_pipeline_properties(self, opencga_path, read_preference='secondaryPreferred'):
+    def _common_eva_pipeline_properties(self, read_preference='secondaryPreferred'):
         files_collection = get_properties_from_xml_file(
             self.maven_profile, self.private_settings_file)['eva.mongo.collections.files']
         annotation_metadata_collection = get_properties_from_xml_file(
@@ -243,21 +226,12 @@ class SpringPropertiesGenerator:
             self.maven_profile, self.private_settings_file)['eva.mongo.collections.annotations']
         variants_collection = get_properties_from_xml_file(
             self.maven_profile, self.private_settings_file)['eva.mongo.collections.variants']
-        job_tracker_properties = self._variant_load_job_tracker_properties()
         props = {
-            'spring.profiles.active': 'production,mongo',
-            'spring.profiles.include': 'variant-writer-mongo,variant-annotation-mongo',
-
-            'spring.data.mongodb.authentication-mechanism': 'SCRAM-SHA-1',
-            'job.repository.driverClassName': 'org.postgresql.Driver',
-
             'db.collections.variants.name': variants_collection,
             'db.collections.files.name': files_collection,
             'db.collections.annotation-metadata.name': annotation_metadata_collection,
             'db.collections.annotations.name': annotation_collection,
 
-            'app.opencga.path': opencga_path,
-            'config.restartability.allow': 'false',
             'config.db.read-preference': read_preference,
 
             'logging.level.embl.ebi.variation.eva': 'DEBUG',
@@ -265,17 +239,16 @@ class SpringPropertiesGenerator:
             'logging.level.org.springframework': 'INFO',
         }
 
-        merge = {**self._common_properties(read_preference=read_preference, chunk_size=100), **props,
-                 **job_tracker_properties}
+        merge = {**self._common_properties(read_preference=read_preference, chunk_size=100), **props}
         return merge
 
-    def get_accession_import_properties(self, opencga_path, read_preference='secondaryPreferred'):
-        return self._format(self._common_eva_pipeline_properties(opencga_path, read_preference))
+    def get_accession_import_properties(self, read_preference='secondaryPreferred'):
+        return self._format(self._common_eva_pipeline_properties(read_preference))
 
     def get_variant_load_properties(self, project_accession, study_name, output_dir, annotation_dir, stats_dir,
-                                    vep_cache_path, opencga_path, read_preference='secondaryPreferred'):
+                                    vep_cache_path, read_preference='secondaryPreferred'):
         return self._format(
-            self._common_eva_pipeline_properties(opencga_path, read_preference),
+            self._common_eva_pipeline_properties(read_preference),
             {
                 'annotation.overwrite': False,
                 'app.vep.cache.path': vep_cache_path,
