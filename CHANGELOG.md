@@ -2,10 +2,10 @@
 Changelog for ebi_eva_common_pyutils
 ===========================
 
-## 0.8.4 (unreleased)
+## 1.0.0 (2026-06-12)
 ---------------------
 
-- Nothing changed yet.
+- Refactored and Updated in accordance with upgrade of java pipelines to java-21
 
 
 ## 0.8.3 (2026-02-19)
