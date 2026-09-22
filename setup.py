@@ -12,7 +12,7 @@ setup(
     scripts=[os.path.join(os.path.dirname(__file__), 'ebi_eva_internal_pyutils', 'archive_directory.py')],
     packages=find_packages(),
     version='1.0.2.dev0',
-    license='Apache',
+    license='Apache-2.0',
     description='EBI EVA - Common Python Utilities',
     url='https://github.com/EBIVariation/eva-common-pyutils',
     keywords=['EBI', 'EVA', 'PYTHON', 'UTILITIES'],
