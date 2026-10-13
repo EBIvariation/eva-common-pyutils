@@ -5,7 +5,7 @@ Changelog for ebi_eva_common_pyutils
 ## 1.0.2 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix log messages of nested loggers being emitted multiple times (once per managed ancestor)
 
 
 ## 1.0.1 (2026-09-21)
