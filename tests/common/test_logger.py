@@ -1,3 +1,4 @@
+import io
 import sys
 import logging
 import logging.handlers
@@ -60,6 +61,17 @@ class TestLoggingConfiguration(TestCommon):
         assert h.formatter is self.log_cfg.blank_formatter
         self.log_cfg.set_formatter(self.log_cfg.default_formatter)
         assert h.formatter is self.log_cfg.default_formatter
+
+    def test_nested_loggers_emit_once(self):
+        stream = io.StringIO()
+        self.log_cfg.add_handler(logging.StreamHandler(stream))
+        child = self.log_cfg.get_logger('parent_logger.child_logger')
+        parent = self.log_cfg.get_logger('parent_logger')
+        # The child is registered first but only its parent, registered last, keeps the handler
+        assert not child.handlers
+        assert list(self.log_cfg.handlers) == parent.handlers
+        child.info('Message')
+        assert stream.getvalue().count('Message') == 1
 
     def test_reset(self):
         l = self.log_cfg.get_logger('a_logger')

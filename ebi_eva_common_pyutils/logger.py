@@ -76,8 +76,7 @@ class LoggingConfiguration:
             self.loggers[name] = logger
         log_level = level if level > self._log_level else self._log_level
         logger.setLevel(log_level)
-        for h in self.handlers:
-            logger.addHandler(h)
+        self._update_handlers()
 
         return logger
 
@@ -90,9 +89,31 @@ class LoggingConfiguration:
         log_level = level if level > self._log_level else self._log_level
         handler.setLevel(log_level)
         handler.setFormatter(self.formatter)
-        for name in self.loggers:
-            self.loggers[name].addHandler(handler)
         self.handlers.add(handler)
+        self._update_handlers()
+
+    def _will_propagate_to_managed_logger(self, logger):
+        """Check if the records of logger propagate to one of its ancestors that is also managed here."""
+        managed_loggers = set(self.loggers.values())
+        current = logger
+        while current.propagate and current.parent is not None:
+            current = current.parent
+            if current in managed_loggers:
+                return True
+        return False
+
+    def _update_handlers(self):
+        """
+        Add the handlers to the managed loggers, except to the ones whose records propagate to another managed
+        logger: that logger's handlers already emit them, so adding the handlers would emit each record twice.
+        """
+        for logger in self.loggers.values():
+            propagates = self._will_propagate_to_managed_logger(logger)
+            for h in self.handlers:
+                if propagates:
+                    logger.removeHandler(h)
+                else:
+                    logger.addHandler(h)
 
     def add_stdout_handler(self, level=logging.INFO):
         self.add_handler(logging.StreamHandler(stdout), level=level or self._log_level)
