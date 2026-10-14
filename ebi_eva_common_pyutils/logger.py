@@ -92,7 +92,7 @@ class LoggingConfiguration:
         self.handlers.add(handler)
         self._update_handlers()
 
-    def _will_propagates_to_managed_logger(self, logger):
+    def _will_propagate_to_managed_logger(self, logger):
         """Check if the records of logger propagate to one of its ancestors that is also managed here."""
         managed_loggers = set(self.loggers.values())
         current = logger
@@ -108,7 +108,7 @@ class LoggingConfiguration:
         logger: that logger's handlers already emit them, so adding the handlers would emit each record twice.
         """
         for logger in self.loggers.values():
-            propagates = self._will_propagates_to_managed_logger(logger)
+            propagates = self._will_propagate_to_managed_logger(logger)
             for h in self.handlers:
                 if propagates:
                     logger.removeHandler(h)
