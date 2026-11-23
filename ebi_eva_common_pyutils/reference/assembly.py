@@ -189,7 +189,7 @@ class NCBIAssembly(AppLogger):
         Download the assembly report if it does not exist then create the assembly fasta from the contig.
         If the assembly already exist then it only add any missing contig.
         """
-        written_contigs = self.get_written_contigs(self.assembly_fasta_path)
+        written_contigs = set(self.get_written_contigs(self.assembly_fasta_path))
         contig_to_append = []
         for row in self.get_assembly_report_rows():
             genbank_accession = row['GenBank-Accn']
@@ -229,7 +229,8 @@ class NCBIAssembly(AppLogger):
         if os.path.isfile(fasta_path):
             with open(fasta_path, 'r') as file:
                 for line in file:
-                    written_contigs.extend(match.findall(line))
+                    if line.startswith('>'):
+                        written_contigs.extend(match.findall(line))
         return written_contigs
 
     @retry(tries=4, delay=2, backoff=1.2, jitter=(1, 3))
